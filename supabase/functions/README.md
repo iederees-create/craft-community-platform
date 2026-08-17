@@ -1,0 +1,3 @@
+# Edge Functions
+
+These authenticated Deno scaffolds define the only boundary for privileged writes. Deploy with `supabase functions deploy <name>` and set `SUPABASE_SERVICE_ROLE_KEY`, Etsy credentials, webhook signing secrets, and `ALLOWED_ORIGIN` with `supabase secrets set`. The placeholder operations intentionally perform no privileged mutation until Claude maps each interface to a reviewed transaction/RPC. Replace the rate-limit hook with an atomic database or gateway limiter before launch. `etsy-webhook` must be adapted to verify the provider signature before its authentication policy is relaxed for public webhook delivery.
