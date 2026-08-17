@@ -108,3 +108,65 @@ Still unresolved / not claimed as done:
   environment. Must run `supabase db push` and `supabase test db`
   before trusting this in production.
 - Continuation items 3–9 above are not started.
+
+---
+
+## Claude — auth/onboarding UI + community charter route (appended)
+
+Branch: agent/github-pages-supabase  
+Commit: 7dcc7b9
+
+Addresses continuation item 3 (auth/age-gate/onboarding slice only — purchase
+claim, entitlement, gallery, Make Log, remix, help, Pattern Lab, reporting,
+blocking, moderation, export/deletion flows are still not started), item 4
+(homepage), and the Community Charter row of the shared integration
+requirements above.
+
+- `src/lib/supabase/client.ts` — lazy singleton `@supabase/supabase-js`
+  browser client (not `@supabase/ssr`: this app has no server runtime to
+  make cookie-based SSR session storage useful). Throws only when actually
+  invoked at runtime, never at module scope, so a missing `.env.local`
+  cannot break `next build`.
+- `src/lib/auth/use-session.ts` — client hook wrapping
+  `supabase.auth.getSession()` + `onAuthStateChange`.
+- `src/components/auth/{sign-in,sign-up}-form.tsx` + `src/app/{sign-in,sign-up}/page.tsx`
+  — password-based email auth. Sign-up handles the
+  email-confirmation-required case explicitly rather than assuming an
+  immediate session.
+- `src/app/onboarding/page.tsx` — requires an authenticated user, requires
+  both an 18+ confirmation checkbox and a Community Charter acknowledgement
+  checkbox before enabling submit, then upserts `profiles` (RLS-protected,
+  self-only) with `display_name` and `age_confirmed_18`.
+- `src/app/guidelines/page.tsx` + `src/lib/markdown/simple-render.tsx` —
+  reads `docs/COMMUNITY_CHARTER.md` directly at build time (Server
+  Component, `fs.readFileSync`, no client fetch) and renders it through a
+  minimal hand-rolled markdown-to-JSX converter (headings/paragraphs/lists
+  only — intentionally not a full markdown library for one doc page). This
+  page can never drift from the charter Codex owns because it renders the
+  file itself rather than a copy.
+- `src/components/layout/site-header.tsx` — auth-aware nav (sign in/join
+  vs. sign out), linked from a new `src/app/layout.tsx`.
+- `src/app/page.tsx` — replaces the default Next.js starter homepage with
+  real Tuftlings copy, explicitly labelled prototype status, no fabricated
+  community activity or numbers.
+
+No server actions, API routes, middleware-dependent auth, or SSR
+dependency were introduced. No service-role key appears anywhere in this
+code. Verified together: `npm run lint` (clean), `npx tsc --noEmit`
+(clean), and a full `npm run build` against Codex's real
+`output: 'export'` config — produced a genuine `out/` static export,
+including a prebuilt `out/guidelines/index.html`, confirming the charter
+route is static-export-safe. Build artifacts were removed before commit.
+
+Still unresolved / not claimed as done:
+
+- No live Supabase project is configured anywhere in this environment, so
+  none of sign-up, sign-in, or the onboarding upsert have been exercised
+  against a real backend — only build-time/type-level verification and
+  code review, not an end-to-end run.
+- Purchase-claim UI, entitlement-gated pattern library, gallery/Make Logs,
+  remix-lineage UI, pattern-help flows, Pattern Lab, reporting/blocking/
+  moderation UI, and account export/deletion are all still unbuilt.
+- The Moderation Handbook, Pattern Testing Programme, Buyer Licence and
+  Safety, and Launch Risk Register integration rows above are not yet
+  reflected anywhere in the app.
