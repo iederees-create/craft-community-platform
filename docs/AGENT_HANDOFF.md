@@ -176,7 +176,7 @@ Still unresolved / not claimed as done:
 ## Codex — GitHub Pages + Supabase-only architecture
 
 Branch: `agent/github-pages-supabase`
-Architecture commit: pending at time of this ledger entry (use the commit containing this section).
+Architecture commit: `2c89337b14cf8d104dd820fdd0653b925b244bdf`.
 
 Codex changed or added:
 
