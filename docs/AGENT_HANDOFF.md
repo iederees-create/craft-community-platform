@@ -1,58 +1,110 @@
-# Agent Handoff Log
+# Tuftlings Agent Work Ledger
 
-Shared ledger between Codex (governance, deployment, static-export
-architecture) and Claude (schema, application UI, buyer-facing content) on
-the Tuftlings platform. Each entry is append-only — do not edit or delete a
-prior agent's entry.
+Updated: 2026-08-17  
+Purpose: prevent Claude Code and Codex from duplicating or overwriting each other's work.
 
-## Branch ownership
+## Verified baseline from Claude Code
 
-- `agent/community-product-governance` — Codex. Do not edit directly.
-- `agent/claude-core-community` — Claude. This entry's branch.
-- `main` — integration branch. PRs land here after cross-review.
+Main commit: b5e8a03471bbc219976f42eb0b0a7ca741100a4b
+
+Claude completed:
+
+- Private GitHub repository creation.
+- Next.js 16, TypeScript, Tailwind, Supabase package scaffold.
+- Initial README and environment example.
+- Prototype migration at supabase/migrations/0001_init.sql.
+- Initial high-level tables and RLS policies.
+- Push to origin/main.
+
+Baseline limitations:
+
+- Homepage remains the default Next.js starter.
+- Migration is explicitly untested and has not been applied to live Supabase.
+- No core application flows exist yet.
+- No physical pattern or buyer PDFs exist yet.
+- No Etsy Complete Product Pack exists yet.
+- No portfolio or blog integration exists yet.
+- No deployment is verified.
+
+## Codex-owned work
+
+Branch: agent/community-product-governance
+
+Codex completed these documentation deliverables:
+
+- docs/COMMUNITY_CHARTER.md
+- docs/MODERATION_HANDBOOK.md
+- docs/PATTERN_TESTING_PROGRAMME.md
+- docs/BUYER_LICENSE_AND_SAFETY.md
+- docs/LAUNCH_RISK_REGISTER.md
+- docs/AGENT_HANDOFF.md
+
+Claude should treat these as product requirements and integrate them into the UI, database workflow, testing, buyer files, and launch gates. Claude should not rewrite or delete them without recording the reason.
+
+## Claude-owned continuation
+
+Claude Code should continue with:
+
+1. Review and harden the initial Supabase migration.
+2. Add missing storage policies, indexes, constraints, updated-at triggers, circle visibility, role mutation controls, and RLS tests.
+3. Build authentication, age gate, onboarding, purchase claim, entitlement, gallery, Make Log, remix, help, Pattern Lab, reporting, blocking, moderation, export, and deletion flows.
+4. Replace the default Next.js homepage with the Tuftlings experience.
+5. Create pattern source and prototype PDFs while keeping them clearly untested.
+6. Build the Francis Listing Manager Complete Product Pack and stop at verified Etsy draft.
+7. Diagnose the existing 3D Portfolio GitHub Pages failure before adding the case study and blog.
+8. Add deployment configuration and verify a safe preview.
+9. Run the agreed test matrix.
+
+## Shared integration requirements
+
+Claude must map the new documentation into the product:
+
+- Community Charter: public community-guidelines route and onboarding acknowledgement.
+- Moderation Handbook: admin case-management fields and incident severity.
+- Pattern Testing Programme: version states, cohort evidence, and approval gate.
+- Buyer Licence and Safety: buyer PDF, listing FAQ, and product licence route.
+- Risk Register: release checklist and automated/manual gates.
+- Work Ledger: update after each meaningful handoff.
+
+## Collision rules
+
+- Codex does not edit Claude's active app files or migration while Claude is working locally.
+- Claude does not modify the Codex branch directly.
+- Integration happens through review/merge of the Codex draft PR.
+- After merge, Claude pulls main before resuming.
+- Paid buyer assets remain outside the public application bundle.
+- Etsy remains draft-only and uses Francis Listing Manager.
+- Portfolio Etsy URL is added only after publication.
+- Demo content is never presented as real community activity.
 
 ---
 
-## Claude — schema hardening (this task)
+## Claude — schema hardening (appended, does not edit the above)
 
-**Branch:** `agent/claude-core-community`
-**Status:** done, unexecuted against a live database (see below)
+Branch: agent/claude-core-community (merged into this integration branch)  
+Commit: 204c4b62a2240401f1491b103f0381f10c5e7c09
 
-**What changed:**
-- `supabase/migrations/0002_hardening.sql` — adds indexes on every
-  foreign-key/common-filter column, additional check constraints (non-blank
-  names/titles/order references, entitlement expiry-after-grant ordering,
-  non-negative time spent, no self-remixing), a unique partial index
-  preventing duplicate active entitlements per user/product, a unique
-  constraint capping one test submission per tester per cohort, a
-  `set_updated_at()` trigger wired to `profiles`, a `handle_new_user()`
-  trigger that auto-provisions a `profiles` row from `auth.users` on
-  signup (0001 defined the column/policy but nothing populated it
-  automatically), an audit-log trigger that records entitlement
-  revocations, and storage bucket + RLS policy definitions for
-  `project-media` (public read, owner write), `pattern-files` (private,
-  entitlement-gated read, no client write — Edge-Function-only), and
-  `evidence` (owner + moderator read, owner write).
-- `supabase/tests/0001_rls.test.sql` — pgTAP RLS regression tests covering
-  purchase-claim privacy, entitlement privacy, project visibility, bookmark
-  privacy (no public counts), and remix-permission enforcement (a remix
-  insert is rejected unless the original project's stated permission
-  allows it).
+Addresses continuation items 1 and 2 above:
 
-**Not yet done / explicitly not claimed:**
-- These migrations and tests have **not been run** — this sandbox has no
-  Docker and no Supabase CLI installed, so there is no local Postgres to
-  apply them against. Before relying on this in production: `supabase
-  start`, `supabase db push`, `supabase test db`, and fix whatever the
-  pgTAP run surfaces.
-- Storage policies assume a `<product_id>/...` and `<user_id>/...` path
-  convention for `pattern-files` and `evidence` respectively — the
-  upload code that writes to those paths doesn't exist yet (tracked under
-  Claude's UI work, not started).
-- No client application code was touched in this task — this was schema
-  only.
+- `supabase/migrations/0002_hardening.sql` — indexes on every FK/filter
+  column, integrity constraints (no duplicate active entitlements per
+  user/product, one test submission per tester per cohort, no
+  self-remixing, expiry-after-grant ordering, non-blank names/titles),
+  an `updated_at` trigger on `profiles`, an `auth.users → profiles`
+  auto-provisioning trigger (0001 had the column/policy but nothing
+  populated it on signup), an entitlement-revocation audit trigger, and
+  storage bucket + RLS policies for `project-media` (public read, owner
+  write), `pattern-files` (private, entitlement-gated read, no client
+  write — Edge-Function-only), and `evidence` (owner + moderator read,
+  owner write).
+- `supabase/tests/0001_rls.test.sql` — pgTAP regression tests for
+  purchase-claim privacy, entitlement privacy, project visibility,
+  bookmark privacy, and remix-permission enforcement.
 
-**Next Claude task:** application screens/auth UI (browser-client-only,
-static-export compatible, no server actions/API routes/middleware — per
-the updated deployment architecture, all privileged writes route through
-Codex-defined Supabase Edge Functions).
+Still unresolved / not claimed as done:
+
+- Neither migration has been applied to a live database, and the pgTAP
+  suite has not been run — no Docker/Supabase CLI is available in this
+  environment. Must run `supabase db push` and `supabase test db`
+  before trusting this in production.
+- Continuation items 3–9 above are not started.
