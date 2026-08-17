@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { authCallbackUrl } from "@/lib/auth/redirect-url";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export function SignUpForm() {
 
     try {
       const supabase = getSupabaseBrowserClient();
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: authCallbackUrl() } });
 
       if (error) {
         setStatus("error");

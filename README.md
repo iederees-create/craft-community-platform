@@ -1,64 +1,28 @@
 # Tuftlings — Craft Community Platform
 
-**Status: PROTOTYPE.** This is the initial foundation for a private community
-platform built around an original modular pocket-creature craft pattern
-system ("Tuftlings"), sold as a digital download and supported here by a
-member community: Make Logs, remix lineage, pattern testing, and
-step-specific help.
+Prototype community platform for Tuftlings makers. Paid pattern files and private evidence must never be committed or included in the static site.
 
-This repository is the **community platform** codebase. It does not contain
-the pattern PDFs or any paid buyer assets — those are distributed through
-Etsy and kept out of this repo entirely.
+## Architecture
 
-## Stack
+- GitHub Pages serves the statically exported Next.js frontend under `/craft-community-platform`.
+- Supabase provides Auth, Postgres with RLS, Storage, Realtime, and authenticated Edge Functions.
+- The browser uses the public project URL and anon key for RLS-safe operations. Privileged purchases, entitlements, roles, moderation, pattern publication/holds, exports, deletion, Etsy, webhooks, and service-role operations go only through Edge Functions.
 
-- [Next.js](https://nextjs.org) (App Router) + TypeScript + Tailwind CSS
-- [Supabase](https://supabase.com) — Auth, Postgres, Storage, Row Level Security
-- Deployment target: [Render](https://render.com)
+There is no Next.js server, middleware, server action, API route, SSR, or runtime dynamic route generation. Database-backed detail pages use static shells plus query parameters.
 
-## Local development
+## Development and validation
 
 ```bash
-npm install
-cp .env.example .env.local   # fill in your own Supabase project values
+npm ci
+cp .env.example .env.local
 npm run dev
+npm run lint
+npm run typecheck
+npm test
+npm run check:edge
+npm run build
+npm run check:pages
+npm run scan:secrets
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-## Database
-
-Schema and Row Level Security policies live in `supabase/migrations/`. Apply
-them to a Supabase project with the Supabase CLI:
-
-```bash
-supabase link --project-ref your-project-ref
-supabase db push
-```
-
-Every table has RLS enabled. Purchase claims, entitlements, and audit logs
-are never publicly readable. Bookmarks and private appreciations are
-owner-only by design — this platform does not surface public
-follower/like counts.
-
-## Design principles
-
-- **Slow social** — finite, chronological pages instead of infinite scroll;
-  no public engagement counts; no streaks; no ads.
-- **No DMs in v1** — private messaging is deliberately excluded to reduce
-  harassment and moderation risk. Use structured public/group discussion
-  instead.
-- **Never assume remix permission** — every project explicitly states one of
-  four permission levels (showcase only, remix with credit, non-commercial
-  remix, commercial handmade remix). Absence of a stated permission means
-  no remix is permitted.
-- **Entitlements are earned, not scraped** — purchase verification never
-  automates or scrapes Etsy. Buyers submit a private purchase claim that is
-  verified via the Etsy API (when configured) or manual admin review.
-
-## Project status
-
-This repository currently contains the initial Next.js scaffold and the
-first Supabase schema/RLS migration. It is an early-stage foundation, not a
-feature-complete product — see the project's release notes for what is
-implemented versus planned.
+See [Edge Function interfaces](docs/EDGE_FUNCTION_INTERFACES.md), [deployment checklist](docs/DEPLOYMENT_CHECKLIST.md), and [agent handoff](docs/AGENT_HANDOFF.md). Database migrations and RLS tests live in `supabase/` and must be tested against a disposable Supabase environment before production.

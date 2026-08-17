@@ -71,6 +71,8 @@ export function SignInForm() {
           {errorMessage}
         </p>
       ) : null}
+      <a href="/reset-password/" className="text-sm text-amber-700 underline">Forgot password?</a>
+      <a href="/reset-password/" className="text-sm text-amber-700 underline">Forgot password?</a>
       <button
         type="submit"
         disabled={status === "loading"}

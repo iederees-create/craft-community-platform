@@ -170,3 +170,41 @@ Still unresolved / not claimed as done:
 - The Moderation Handbook, Pattern Testing Programme, Buyer Licence and
   Safety, and Launch Risk Register integration rows above are not yet
   reflected anywhere in the app.
+
+---
+
+## Codex — GitHub Pages + Supabase-only architecture
+
+Branch: `agent/github-pages-supabase`
+Architecture commit: pending at time of this ledger entry (use the commit containing this section).
+
+Codex changed or added:
+
+- `.github/workflows/pages.yml`
+- `.gitignore`
+- `.env.example` and `next.config.ts` (the concurrent Claude commit incorporated Codex's prepared static-export/env edits)
+- `package.json` and `tsconfig.json`
+- `README.md`
+- `docs/DEPLOYMENT_CHECKLIST.md`
+- `docs/EDGE_FUNCTION_INTERFACES.md`
+- `docs/AGENT_HANDOFF.md`
+- `public/vercel.svg` (removed unused starter asset)
+- `scripts/check-edge-functions.mjs`, `scripts/check-pages-output.mjs`, `scripts/scan-secrets.mjs`
+- `src/app/auth/callback/page.tsx`, `src/app/project/page.tsx`, `src/app/reset-password/page.tsx`
+- `src/app/layout.tsx`
+- `src/components/auth/sign-in-form.tsx`, `src/components/auth/sign-up-form.tsx`
+- `src/lib/auth/redirect-url.ts`
+- `supabase/functions/README.md`, `supabase/functions/_shared/http.ts`, and the ten function `index.ts` scaffolds named in `docs/EDGE_FUNCTION_INTERFACES.md`
+- `tests/architecture.test.mjs`
+
+Decisions/interfaces Claude must preserve:
+
+- GitHub Pages is the only frontend host; production paths use `/craft-community-platform`, trailing slashes, static export, and unoptimised images.
+- There is no Next server surface. Use browser Supabase calls only behind reviewed RLS; use the documented Edge Functions for every privileged/service-role operation.
+- Detail pages that depend on database IDs use static shells with query parameters unless every route can be generated at build time.
+- Never expose service-role/Etsy/webhook secrets in GitHub, the Pages artifact, or `NEXT_PUBLIC_*`.
+- Edge handlers are security-boundary scaffolds only. Claude must implement narrow, idempotent RPC/transaction bodies, atomic rate limiting, exhaustive input schemas, webhook signature validation, and integration tests before launch.
+
+Validation run: ESLint, Next TypeScript check, Node unit tests, production static export, Pages base-path/artifact verification, real `deno check` for all ten functions, tracked-file secret scan, repository/history credential search, private-file extension/name scan, and current-tree forbidden-host search. Supabase migrations/pgTAP remain unexecuted because no linked disposable Supabase instance was supplied.
+
+Remaining for Claude: implement and integration-test each Edge transaction; finish application flows against these interfaces; exercise signup/verification/reset/session restoration against a real Supabase project; apply/test migrations and Storage RLS; configure production Auth URLs/secrets/buckets; and obtain Iederees's explicit decision about GitHub Pro versus public code if private Pages is unavailable.
