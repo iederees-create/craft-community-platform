@@ -208,3 +208,22 @@ Decisions/interfaces Claude must preserve:
 Validation run: ESLint, Next TypeScript check, Node unit tests, production static export, Pages base-path/artifact verification, real `deno check` for all ten functions, tracked-file secret scan, repository/history credential search, private-file extension/name scan, and current-tree forbidden-host search. Supabase migrations/pgTAP remain unexecuted because no linked disposable Supabase instance was supplied.
 
 Remaining for Claude: implement and integration-test each Edge transaction; finish application flows against these interfaces; exercise signup/verification/reset/session restoration against a real Supabase project; apply/test migrations and Storage RLS; configure production Auth URLs/secrets/buckets; and obtain Iederees's explicit decision about GitHub Pro versus public code if private Pages is unavailable.
+
+---
+
+## Codex — public experience and Pages recovery
+
+Updated: 2026-08-25
+
+- Diagnosed the missing Pages site: the deployment workflow and completed static-export work existed only on `agent/github-pages-supabase`; public `main` was still the original scaffold.
+- Rebuilt the public homepage with a complete Tuftlings identity, responsive navigation, product principles, making loop, transparent Pattern Lab positioning, and early-access calls to action.
+- Added `/explore/` as an explicitly labelled concept gallery. Its examples are never presented as real member activity.
+- Added `/pattern-lab/` with honest prototype status, zero completed independent tests, release gates, and tester principles.
+- Added the shared footer, mobile navigation, production metadata, and a responsive design system.
+- Verified lint, TypeScript, architecture tests, static export, Pages base path/routes, and the tracked-file secret scan. Desktop visual QA was also completed in Chrome.
+
+Still unresolved:
+
+- Supabase production variables, Auth redirect URLs, migrations, Storage policies, and Edge Functions must be configured and tested against a disposable project before real member onboarding.
+- Gallery uploads, Make Logs, entitlements, remixes, help, reporting/blocking, moderation, export, and deletion remain backend-dependent implementation work.
+- Pattern 001 remains a prototype with zero independent tests and must not be sold as tested.
